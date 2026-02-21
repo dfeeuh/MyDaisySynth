@@ -12,6 +12,18 @@ using namespace daisysp;
 class Synth
 {
 public:
+    static Synth* Create(std::shared_ptr<EvQueue> q, float sampleRate) {
+        if (!instance_) {
+            instance_ = std::make_unique<Synth>(q, sampleRate);
+        }
+
+        return instance_.get();
+    }
+
+    static Synth* Instance() {
+        return instance_.get();
+    }
+
     Synth(std::shared_ptr<EvQueue> q, float sampleRate) :
         freq{1000},
         amp{0.25},
@@ -20,6 +32,10 @@ public:
         osc.Init(sampleRate);
     }
     ~Synth() = default;
+
+    static void AudioCallback(AudioHandle::InputBuffer  in,
+                       AudioHandle::OutputBuffer out,
+                       size_t                    size);
 
     // Single channel processing
     void Process(float* sample);
@@ -37,4 +53,6 @@ private:
     float amp;
 
     std::shared_ptr<EvQueue> evq;
+
+    static std::unique_ptr<Synth> instance_;
 };

@@ -1,5 +1,18 @@
 #include "synth.h"
 
+
+std::unique_ptr<Synth> Synth::instance_ = nullptr;
+
+
+void Synth::AudioCallback(AudioHandle::InputBuffer  in,
+                   AudioHandle::OutputBuffer out,
+                   size_t                    size) {
+    for (size_t i=0; i < size; i++) {
+        Synth::Instance()->Process(&out[1][i]);
+        out[0][i] = out[1][i];
+    }
+}
+
 void Synth::Process(float* sample) {
     Ev e;
     while(evq->pop(e)) {
