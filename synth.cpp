@@ -24,11 +24,11 @@ void Synth::setAmp(float a) {
 }
 
 void Synth::NoteOn(uint8_t note, uint8_t vel) {
-    float amp = vel / 127;
-    // osc.SetAmp(amp);
+    float amp = (float)vel / 127;
+    osc.SetAmp(amp);
     osc.SetFreq(mtof(note));
 }
 
 void Synth::NoteOff(uint8_t note) {
-    // osc.SetAmp(0);
+    osc.SetAmp(0);
 }
