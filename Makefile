@@ -2,7 +2,7 @@
 TARGET = SynthExpt
 
 # Sources
-CPP_SOURCES = SynthExpt.cpp synth.cpp
+CPP_SOURCES = SynthExpt.cpp synth.cpp MidiManager.cpp
 
 # Library Locations
 LIBDAISY_DIR = ../../libDaisy/

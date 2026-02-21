@@ -10,6 +10,8 @@
 #include "daisysp.h"
 
 #include "synth.h"
+#include "MidiManager.h"
+#include "EventQueue.h"
 
 #include <memory>
 
@@ -21,6 +23,7 @@ MidiUsbHandler midi;
 Oscillator     osc;
 
 std::unique_ptr<Synth> gSynth;
+EvQueue gEvQueue;
 
 void AudioCallback(AudioHandle::InputBuffer  in,
                    AudioHandle::OutputBuffer out,
@@ -48,8 +51,12 @@ int main(void)
     midi_cfg.transport_config.periph = MidiUsbTransport::Config::INTERNAL;
     midi.Init(midi_cfg);
 
+    std::shared_ptr<EvQueue> evq = std::make_shared<EvQueue>();
+
+    MidiManager midiMgr(evq);
+
     /** Initialize our test tone */
-    gSynth = std::make_unique<Synth>(hw.AudioSampleRate());
+    gSynth = std::make_unique<Synth>(evq, hw.AudioSampleRate());
 
     /** And start the audio callback */
     hw.StartAudio(AudioCallback);
@@ -63,20 +70,22 @@ int main(void)
         {
             /** Pull the oldest one from the list... */
             auto msg = midi.PopEvent();
-            switch(msg.type)
-            {
-                case NoteOn:
-                {
-                    /** and change the frequency of the oscillator */
-                    auto note_msg = msg.AsNoteOn();
-                    if(note_msg.velocity != 0)
-                        gSynth->setFreq(mtof(note_msg.note));
-                }
-                break;
-                    // Since we only care about note-on messages in this example
-                    // we'll ignore all other message types
-                default: break;
-            }
+            midiMgr.HandleMidiMessage(msg);
+
+        //     switch(msg.type)
+        //     {
+        //         case NoteOn:
+        //         {
+        //             /** and change the frequency of the oscillator */
+        //             auto note_msg = msg.AsNoteOn();
+        //             if(note_msg.velocity != 0)
+        //                 gSynth->setFreq(mtof(note_msg.note));
+        //         }
+        //         break;
+        //             // Since we only care about note-on messages in this example
+        //             // we'll ignore all other message types
+        //         default: break;
+        //     }
         }
     }
 }
