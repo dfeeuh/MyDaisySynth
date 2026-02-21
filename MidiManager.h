@@ -18,5 +18,7 @@ private:
     void onNoteOn(uint8_t note, uint8_t vel);
     void onNoteOff(uint8_t note);
 
+    void onSetAmp(uint8_t amp);
+
     std::shared_ptr<EvQueue> evq;
 };

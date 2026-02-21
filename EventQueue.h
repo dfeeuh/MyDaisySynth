@@ -14,6 +14,8 @@ struct Ev {
     uint8_t note;
     uint8_t vel;
     /* extra bytes for params */
+
+    float amp;
 };
 
 class EvQueue {

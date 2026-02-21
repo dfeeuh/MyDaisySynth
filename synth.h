@@ -33,12 +33,10 @@ public:
     }
     ~Synth() = default;
 
+    // This must be static to assign to the hardware handler.
     static void AudioCallback(AudioHandle::InputBuffer  in,
                        AudioHandle::OutputBuffer out,
                        size_t                    size);
-
-    // Single channel processing
-    void Process(float* sample);
 
     void NoteOn(uint8_t note, uint8_t vel);
     void NoteOff(uint8_t note);
@@ -47,6 +45,9 @@ public:
     void setAmp(float a);
 
 private:
+
+    void Process(float *sampleL, float *sampleR, size_t size);
+
     Oscillator osc;
 
     float freq;

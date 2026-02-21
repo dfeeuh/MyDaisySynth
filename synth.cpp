@@ -7,13 +7,11 @@ std::unique_ptr<Synth> Synth::instance_ = nullptr;
 void Synth::AudioCallback(AudioHandle::InputBuffer  in,
                    AudioHandle::OutputBuffer out,
                    size_t                    size) {
-    for (size_t i=0; i < size; i++) {
-        Synth::Instance()->Process(&out[1][i]);
-        out[0][i] = out[1][i];
-    }
+
+    Synth::Instance()->Process(out[0], out[1], size);
 }
 
-void Synth::Process(float* sample) {
+void Synth::Process(float *sampleL, float *sampleR, size_t size) {
     Ev e;
     while(evq->pop(e)) {
         if (e.type == EV_NOTE_ON) {
@@ -22,9 +20,14 @@ void Synth::Process(float* sample) {
         else if (e.type == EV_NOTE_OFF) {
             NoteOff(e.note);
         }
+        else if (e.type == EV_PARAM) {
+            setAmp(e.amp);
+        }
     }
 
-    *sample = osc.Process();
+    for (size_t i=0; i < size; i++) {
+        sampleL[i] = sampleR[i] = amp * osc.Process();
+    }
 }
 
 void Synth::setFreq(float f) {

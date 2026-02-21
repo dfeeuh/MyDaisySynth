@@ -17,7 +17,13 @@ void MidiManager::HandleMidiMessage(daisy::MidiEvent m) {
         break;
     }
     case daisy::ControlChange:
+    {
+        daisy::ControlChangeEvent p = m.AsControlChange();
+        if (p.control_number == 1) {
+            onSetAmp(p.value);
+        }
         break;
+    }
     default:
         return;
     }
@@ -31,3 +37,8 @@ void MidiManager::onNoteOff(uint8_t note) {
     evq->push({EV_NOTE_OFF, note, 0});
 }
 
+void MidiManager::onSetAmp(uint8_t amp) {
+    Ev event = { EV_PARAM};
+    event.amp = (float) amp / 127;
+    evq->push(event);
+}

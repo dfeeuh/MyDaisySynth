@@ -40,15 +40,17 @@ int main(void)
     midi_cfg.transport_config.periph = MidiUsbTransport::Config::INTERNAL;
     midi.Init(midi_cfg);
 
+    // Shared event queue.
     std::shared_ptr<EvQueue> evq = std::make_shared<EvQueue>();
 
     MidiManager midiMgr(evq);
 
-    /** Initialize our test tone */
+    /** Initialize our synth */
     Synth::Create(evq, hw.AudioSampleRate());
 
     /** And start the audio callback */
     hw.StartAudio(Synth::Instance()->AudioCallback);
+
     while(1)
     {
         /** Listen to MIDI for new changes */
