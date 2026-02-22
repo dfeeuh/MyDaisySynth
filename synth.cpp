@@ -1,50 +1,44 @@
 #include "synth.h"
+#include "SynthParams.h"
+#include "EventQueue.h"
+
+Synth* Synth::instance_ = nullptr;
 
 
-std::unique_ptr<Synth> Synth::instance_ = nullptr;
-
-
-void Synth::AudioCallback(AudioHandle::InputBuffer  in,
-                   AudioHandle::OutputBuffer out,
-                   size_t                    size) {
-
-    Synth::Instance()->Process(out[0], out[1], size);
+Synth::Synth(
+    ParameterState& params,
+    EvQueue& q,
+    float sampleRate) :
+    evq{q},
+    params_{params}
+{
+    osc.Init(sampleRate);
+    osc.SetAmp(0);
 }
 
 void Synth::Process(float *sampleL, float *sampleR, size_t size) {
     Ev e;
-    while(evq->pop(e)) {
+    while(evq.pop(e)) {
         if (e.type == EV_NOTE_ON) {
-            NoteOn(e.note, e.vel);
+            NoteOn(e.freq, e.vel);
         }
         else if (e.type == EV_NOTE_OFF) {
-            NoteOff(e.note);
-        }
-        else if (e.type == EV_PARAM) {
-            setAmp(e.amp);
+            NoteOff();
         }
     }
+
+    SynthParams p = params_.GetReadParams();
 
     for (size_t i=0; i < size; i++) {
-        sampleL[i] = sampleR[i] = amp * osc.Process();
+        sampleL[i] = sampleR[i] = p.amplitude * osc.Process();
     }
 }
 
-void Synth::setFreq(float f) {
-    freq = f;
-    osc.SetFreq(freq);
-}
-
-void Synth::setAmp(float a) {
-    amp = a;
-}
-
-void Synth::NoteOn(uint8_t note, uint8_t vel) {
-    float amp = (float)vel / 127;
+void Synth::NoteOn(float f, float amp) {
     osc.SetAmp(amp);
-    osc.SetFreq(mtof(note));
+    osc.SetFreq(f);
 }
 
-void Synth::NoteOff(uint8_t note) {
+void Synth::NoteOff() {
     osc.SetAmp(0);
 }

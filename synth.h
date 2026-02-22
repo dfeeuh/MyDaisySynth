@@ -2,58 +2,49 @@
 #include "daisy_seed.h"
 #include "daisysp.h"
 
-#include "EventQueue.h"
-
-#include <memory>
 
 using namespace daisy;
 using namespace daisysp;
 
+class ParameterState;
+class EvQueue;
+
 class Synth
 {
 public:
-    static Synth* Create(std::shared_ptr<EvQueue> q, float sampleRate) {
+    static Synth* Create(
+        ParameterState& params,
+        EvQueue& q,
+        float sampleRate)
+    {
         if (!instance_) {
-            instance_ = std::make_unique<Synth>(q, sampleRate);
+            static Synth synth(params, q, sampleRate);
+            instance_ = &synth;
         }
 
-        return instance_.get();
+        return instance_;
     }
 
-    static Synth* Instance() {
-        return instance_.get();
-    }
+    static Synth& Instance() { return *instance_; }
 
-    Synth(std::shared_ptr<EvQueue> q, float sampleRate) :
-        freq{1000},
-        amp{0.25},
-        evq{q}
-    {
-        osc.Init(sampleRate);
-    }
+    Synth(
+        ParameterState& params,
+        EvQueue& q,
+        float sampleRate);
+
     ~Synth() = default;
-
-    // This must be static to assign to the hardware handler.
-    static void AudioCallback(AudioHandle::InputBuffer  in,
-                       AudioHandle::OutputBuffer out,
-                       size_t                    size);
-
-    void NoteOn(uint8_t note, uint8_t vel);
-    void NoteOff(uint8_t note);
-
-    void setFreq(float f);
-    void setAmp(float a);
-
-private:
 
     void Process(float *sampleL, float *sampleR, size_t size);
 
+    void NoteOn(float freq, float amp);
+    void NoteOff();
+
+private:
     Oscillator osc;
 
-    float freq;
-    float amp;
+    // Shared references
+    EvQueue& evq;
+    ParameterState& params_;
 
-    std::shared_ptr<EvQueue> evq;
-
-    static std::unique_ptr<Synth> instance_;
+    static Synth *instance_;
 };

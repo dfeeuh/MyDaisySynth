@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstdint>
 #include <atomic>
 
 // small event type
@@ -11,11 +10,9 @@ enum EvType {
 
 struct Ev {
     uint8_t type;
-    uint8_t note;
-    uint8_t vel;
+    float freq; // Frequency
+    float vel; // Normalised velocity 0.. 1.0
     /* extra bytes for params */
-
-    float amp;
 };
 
 class EvQueue {

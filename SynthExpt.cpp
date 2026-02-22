@@ -12,21 +12,24 @@
 #include "synth.h"
 #include "MidiManager.h"
 #include "EventQueue.h"
-
-#include <memory>
+#include "SynthParams.h"
 
 using namespace daisy;
 using namespace daisysp;
 
-DaisySeed      hw;
-MidiUsbHandler midi;
-Oscillator     osc;
 
-EvQueue gEvQueue;
+void AudioCallback(AudioHandle::InputBuffer  in,
+                   AudioHandle::OutputBuffer out,
+                   size_t                    size) {
+    (void)in;
+    Synth::Instance().Process(out[0], out[1], size);
+}
+
 
 int main(void)
 {
     /** Basic initialization of Daisy hardware */
+    DaisySeed hw;
     hw.Configure();
     hw.Init();
 
@@ -38,18 +41,18 @@ int main(void)
 		 */
     MidiUsbHandler::Config midi_cfg;
     midi_cfg.transport_config.periph = MidiUsbTransport::Config::INTERNAL;
+
+    MidiUsbHandler midi;
     midi.Init(midi_cfg);
 
-    // Shared event queue.
-    std::shared_ptr<EvQueue> evq = std::make_shared<EvQueue>();
-
-    MidiManager midiMgr(evq);
-
     /** Initialize our synth */
-    Synth::Create(evq, hw.AudioSampleRate());
+    EvQueue evq; // Shared event queue.
+    ParameterState parameterState; // Shared parameter state
+    MidiManager midiMgr(parameterState, evq);
+    Synth::Create(parameterState, evq, hw.AudioSampleRate());
 
     /** And start the audio callback */
-    hw.StartAudio(Synth::Instance()->AudioCallback);
+    hw.StartAudio(AudioCallback);
 
     while(1)
     {
@@ -63,5 +66,7 @@ int main(void)
             auto msg = midi.PopEvent();
             midiMgr.HandleMidiMessage(msg);
         }
+
+        midiMgr.CommitIfDirty();
     }
 }

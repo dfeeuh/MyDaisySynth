@@ -1,24 +1,32 @@
 #pragma once
 
 #include "daisy_seed.h"
-#include "EventQueue.h"
 
-#include <memory>
 
+class ParameterState;
+class EvQueue;
 
 class MidiManager
 {
 public:
-    MidiManager(std::shared_ptr<EvQueue> q) : evq{q} {}
+    MidiManager(
+        ParameterState& params,
+        EvQueue& q) : params_{params}, evq{q}
+    {}
     ~MidiManager() = default;
 
     void HandleMidiMessage(daisy::MidiEvent m);
+
+    void CommitIfDirty();
 
 private:
     void onNoteOn(uint8_t note, uint8_t vel);
     void onNoteOff(uint8_t note);
 
-    void onSetAmp(uint8_t amp);
+    void onHandleCc(uint8_t cc, uint8_t value);
 
-    std::shared_ptr<EvQueue> evq;
+    ParameterState& params_;
+    EvQueue& evq;
+
+    bool dirty_ = false;
 };
