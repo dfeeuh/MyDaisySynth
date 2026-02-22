@@ -15,6 +15,8 @@ Synth::Synth(
 {
     osc.Init(sampleRate);
     osc.SetAmp(1.0f);
+
+    note_smoothing_coeff_ = 1.0f / (sampleRate_ * 5e-3f);
 }
 
 void Synth::Process(float *sampleL, float *sampleR, size_t size) {
@@ -33,11 +35,9 @@ void Synth::Process(float *sampleL, float *sampleR, size_t size) {
     float target_amp = p.amplitude;
     amp_slew_ = (target_amp - current_amp_) / size;
 
-    note_slew_ = (note_target_gain_ - note_gain_) / size;
-
     for (size_t i=0; i < size; i++) {
         current_amp_ += amp_slew_;
-        note_gain_   += note_slew_;
+        note_gain_   += note_smoothing_coeff_ * (note_target_gain_ - note_gain_);
 
         float s = osc.Process();
         float final = s * note_gain_ * current_amp_;

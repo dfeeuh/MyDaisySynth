@@ -53,7 +53,7 @@ private:
 
     float note_gain_ = 0.0f;        // current smoothed gain
     float note_target_gain_ = 0.0f; // where we want to go
-    float note_slew_ = 0.0f;
+    float note_smoothing_coeff_;
 
     float sampleRate_;
 };
