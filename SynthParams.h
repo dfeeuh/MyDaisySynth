@@ -2,7 +2,7 @@
 
 struct SynthParams
 {
-    float amplitude;
+    float amplitude;  // Overall amplitude
     float cutoff;
     float resonance;
     float attack;
@@ -12,7 +12,11 @@ struct SynthParams
     // add as many as you like
 
     SynthParams() :
-      amplitude{0.99f}
+      amplitude{1.0f},
+      attack{5e-3f},
+      decay{0.f},
+      sustain{1.0f},
+      release{5e-3f}
     {}
 };
 
