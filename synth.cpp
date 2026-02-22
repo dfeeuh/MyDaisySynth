@@ -10,7 +10,8 @@ Synth::Synth(
     EvQueue& q,
     float sampleRate) :
     evq{q},
-    params_{params}
+    params_{params},
+    sampleRate_{sampleRate}
 {
     osc.Init(sampleRate);
     osc.SetAmp(0);
@@ -29,8 +30,12 @@ void Synth::Process(float *sampleL, float *sampleR, size_t size) {
 
     SynthParams p = params_.GetReadParams();
 
+    float target_amp = p.amplitude;
+    amp_slew_ = (target_amp - current_amp_) / size;
+
     for (size_t i=0; i < size; i++) {
-        sampleL[i] = sampleR[i] = p.amplitude * osc.Process();
+        current_amp_ += amp_slew_;
+        sampleL[i] = sampleR[i] = current_amp_ * osc.Process();
     }
 }
 

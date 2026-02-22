@@ -47,4 +47,9 @@ private:
     ParameterState& params_;
 
     static Synth *instance_;
+
+    float current_amp_ = 0.0f;
+    float amp_slew_ = 0.0f;
+
+    float sampleRate_;
 };

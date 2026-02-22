@@ -47,7 +47,7 @@ void MidiManager::onHandleCc(uint8_t cc, uint8_t value) {
 
     switch(cc)
     {
-    case 41: // Launchkey slider 1 (Need a mapping interface)
+    case 11: // Master Amplitude
         p.amplitude = (float)value / 127;
         dirty_ = true;
     default:
