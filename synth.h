@@ -51,5 +51,9 @@ private:
     float current_amp_ = 0.0f;
     float amp_slew_ = 0.0f;
 
+    float note_gain_ = 0.0f;        // current smoothed gain
+    float note_target_gain_ = 0.0f; // where we want to go
+    float note_slew_ = 0.0f;
+
     float sampleRate_;
 };
