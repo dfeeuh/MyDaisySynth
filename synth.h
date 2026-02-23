@@ -45,8 +45,9 @@ private:
 
     static Synth *instance_;
 
-    float current_amp_ = 0.0f;
-    float amp_slew_ = 0.0f;
+    float current_amp_ = 0.0f;  // Master amplitude
+    float note_velocity_target_ = 0.0f; // Note velocity
+    float note_velocity_ = 0.0f;        // Note velocity (current)
 
     float sampleRate_;
     bool env_gate_ = false;

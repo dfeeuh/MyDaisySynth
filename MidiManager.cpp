@@ -61,7 +61,7 @@ void MidiManager::onHandleCc(uint8_t cc, uint8_t value) {
         break;
 
     case 12: // Attack
-        p.attack = MapLogTime(value, 0.001f, 10.0f);
+        p.attack = MapLogTime(value, 0.005f, 10.0f);
         dirty_ = true;
         break;
 

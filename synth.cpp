@@ -15,6 +15,7 @@ Synth::Synth(
 {
     osc.Init(sampleRate);
     //osc.SetWaveform(daisysp::Oscillator::WAVE_SQUARE);
+    osc.SetAmp(1.0f); // Set separately to master gain
     env.Init(sampleRate);
 }
 
@@ -29,10 +30,12 @@ void Synth::Process(float *sampleL, float *sampleR, size_t size) {
         }
     }
 
+    float vel_slew = (note_velocity_target_ - note_velocity_) / size;
+
     SynthParams p = params_.GetReadParams();
 
     // Master volume - slew to smooth (reduce zipper)
-    amp_slew_ = (p.amplitude - current_amp_) / size;
+    float amp_slew = (p.amplitude - current_amp_) / size;
 
     env.SetAttackTime(p.attack);
     env.SetDecayTime(p.decay);
@@ -40,13 +43,14 @@ void Synth::Process(float *sampleL, float *sampleR, size_t size) {
     env.SetReleaseTime(p.release);
 
     for (size_t i=0; i < size; i++) {
-        current_amp_ += amp_slew_;
+        current_amp_ += amp_slew;
+        note_velocity_ += vel_slew;
 
         float env_level = env.Process(env_gate_);
 
         float s = osc.Process();
 
-        float final = s * env_level * current_amp_;
+        float final = s * env_level * note_velocity_ * current_amp_;
 
         sampleL[i] = final;
         sampleR[i] = final;
@@ -55,8 +59,11 @@ void Synth::Process(float *sampleL, float *sampleR, size_t size) {
 
 void Synth::NoteOn(float f, float amp) {
     osc.SetFreq(f);
-    osc.SetAmp(amp);
+    note_velocity_target_ = amp;
     env_gate_ = true;
+
+    // Retrigger results in discontinuities.
+    env.Retrigger(false);
 }
 
 void Synth::NoteOff() {
