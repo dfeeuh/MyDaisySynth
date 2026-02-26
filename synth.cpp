@@ -30,8 +30,6 @@ void Synth::Process(float *sampleL, float *sampleR, size_t size) {
         }
     }
 
-    float vel_slew = (note_velocity_target_ - note_velocity_) / size;
-
     SynthParams p = params_.GetReadParams();
 
     // Master volume - slew to smooth (reduce zipper)
@@ -44,13 +42,13 @@ void Synth::Process(float *sampleL, float *sampleR, size_t size) {
 
     for (size_t i=0; i < size; i++) {
         current_amp_ += amp_slew;
-        note_velocity_ += vel_slew;
+        note_velocity_ += 0.001f * (note_velocity_target_ - note_velocity_);
 
-        float env_level = env.Process(env_gate_);
+        float env_out = env.Process(env_gate_);
+        float osc_out = osc.Process();
 
-        float s = osc.Process();
-
-        float final = s * env_level * note_velocity_ * current_amp_;
+        float voice_amp = env_out * note_velocity_;
+        float final     = osc_out * voice_amp * current_amp_;
 
         sampleL[i] = final;
         sampleR[i] = final;

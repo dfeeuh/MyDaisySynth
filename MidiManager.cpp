@@ -12,6 +12,11 @@ inline float MapLogTime(uint8_t value,
     return min_time * powf(max_time / min_time, t);
 }
 
+inline float MapVelocity(uint8_t vel)
+{
+    float v = vel / 127.0f;
+    return powf(v, 2.5f); // closer to natural exponent value.
+}
 
 void MidiManager::HandleMidiMessage(daisy::MidiEvent m) {
 
@@ -42,7 +47,7 @@ void MidiManager::HandleMidiMessage(daisy::MidiEvent m) {
 
 void MidiManager::onNoteOn(uint8_t note, uint8_t vel) {
     float f = daisysp::mtof(note);
-    float amp = vel / 127.f;
+    float amp = MapVelocity((float)vel);
     evq.push({EV_NOTE_ON, f, amp});
 }
 
