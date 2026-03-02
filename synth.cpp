@@ -33,12 +33,12 @@ void Synth::Process(float *sampleL, float *sampleR, size_t size) {
     SynthParams p = params_.GetReadParams();
 
     // Master volume - slew to smooth (reduce zipper)
-    float amp_slew = (p.amplitude - current_amp_) / size;
+    float amp_slew = (p.values[ParamID::MasterAmplitude] - current_amp_) / size;
 
-    env.SetAttackTime(p.attack);
-    env.SetDecayTime(p.decay);
-    env.SetSustainLevel(p.sustain);
-    env.SetReleaseTime(p.release);
+    env.SetAttackTime(p.values[ParamID::Attack]);
+    env.SetDecayTime(p.values[ParamID::Decay]);
+    env.SetSustainLevel(p.values[ParamID::Sustain]);
+    env.SetReleaseTime(p.values[ParamID::Release]);
 
     for (size_t i=0; i < size; i++) {
         current_amp_ += amp_slew;

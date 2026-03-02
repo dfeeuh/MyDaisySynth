@@ -4,94 +4,92 @@
 
 #include "daisysp.h"
 
-inline float MapLogTime(uint8_t value,
-                        float min_time,
-                        float max_time)
+static int8_t kCcToParam[128] = {-1};
+
+
+MidiManager::MidiManager(ParameterState& params, EvQueue& q)
+    : params_{params}
+    , evq{q}
 {
-    float t = value / 127.f;          // normalize 0–1
-    return min_time * powf(max_time / min_time, t);
+    initCcMap();
 }
 
-inline float MapVelocity(uint8_t vel)
+void MidiManager::HandleMidiMessage(daisy::MidiEvent m)
 {
-    float v = vel / 127.0f;
-    return powf(v, 2.5f); // closer to natural exponent value.
-}
-
-void MidiManager::HandleMidiMessage(daisy::MidiEvent m) {
-
     switch(m.type)
     {
-    case daisy::NoteOn:
-    {
-        daisy::NoteOnEvent p = m.AsNoteOn();
-        onNoteOn(p.note, p.velocity);
-        break;
-    }
-    case daisy::NoteOff:
-    {
-        daisy::NoteOnEvent p = m.AsNoteOn();
-        onNoteOff(p.note);
-        break;
-    }
-    case daisy::ControlChange:
-    {
-        daisy::ControlChangeEvent p = m.AsControlChange();
-        onHandleCc(p.control_number, p.value);
-        break;
-    }
-    default:
-        return;
+        case daisy::NoteOn:
+        {
+            daisy::NoteOnEvent p = m.AsNoteOn();
+            onNoteOn(p.note, p.velocity);
+            break;
+        }
+        case daisy::NoteOff:
+        {
+            daisy::NoteOnEvent p = m.AsNoteOn();
+            onNoteOff(p.note);
+            break;
+        }
+        case daisy::ControlChange:
+        {
+            daisy::ControlChangeEvent p = m.AsControlChange();
+            onHandleCc(p.control_number, p.value);
+            break;
+        }
+        default: return;
     }
 }
 
-void MidiManager::onNoteOn(uint8_t note, uint8_t vel) {
-    float f = daisysp::mtof(note);
-    float amp = MapVelocity((float)vel);
+void MidiManager::onNoteOn(uint8_t note, uint8_t vel)
+{
+    float f   = daisysp::mtof(note);
+    float amp = daisysp::fmap(vel/127.f, 0.f, 1.f, daisysp::Mapping::EXP);
     evq.push({EV_NOTE_ON, f, amp});
 }
 
-void MidiManager::onNoteOff(uint8_t note) {
+void MidiManager::onNoteOff(uint8_t note)
+{
     evq.push({EV_NOTE_OFF});
 }
 
-void MidiManager::onHandleCc(uint8_t cc, uint8_t value) {
+constexpr ParamDescriptor kParamDescriptors[] = {
+    {0.0f, 1.0f, daisysp::Mapping::LINEAR},    // MasterAmplitude
+    {0.005f, 10.0f, daisysp::Mapping::LOG}, // Attack
+    {0.005f, 10.0f, daisysp::Mapping::LOG}, // Decay
+    {0.0f, 1.0f, daisysp::Mapping::LINEAR},    // Sustain
+    {0.005f, 15.0f, daisysp::Mapping::LOG}, // Release
+};
+
+void MidiManager::initCcMap()
+{
+    /* 0–10 unused = -1 */
+    kCcToParam[11] = (int8_t)ParamID::MasterAmplitude;
+    kCcToParam[12] = (int8_t)ParamID::Attack;
+    kCcToParam[13] = (int8_t)ParamID::Decay;
+    kCcToParam[14] = (int8_t)ParamID::Sustain;
+    kCcToParam[15] = (int8_t)ParamID::Release;
+};
+
+void MidiManager::onHandleCc(uint8_t cc, uint8_t value)
+{
+    int8_t pid = kCcToParam[cc];
+    if(pid < 0)
+        return;
+
     auto& p = params_.GetWriteParams();
 
-    switch(cc)
-    {
-    case 11: // Master Amplitude
-        p.amplitude = value / 127.f;
-        dirty_ = true;
-        break;
+    const auto& desc = kParamDescriptors[pid];
 
-    case 12: // Attack
-        p.attack = MapLogTime(value, 0.005f, 10.0f);
-        dirty_ = true;
-        break;
+    float normalized = value / 127.f;
+    p.values[pid] = daisysp::fmap(normalized, desc.min, desc.max, desc.mapping);
 
-    case 13: // Decay
-        p.decay = MapLogTime(value, 0.005f, 10.0f);
-        dirty_ = true;
-        break;
-
-    case 14: // Sustain
-        p.sustain = value / 127.f;   // sustain is level, linear is correct
-        dirty_ = true;
-        break;
-
-    case 15: // Release
-        p.release = MapLogTime(value, 0.005f, 15.0f);
-        dirty_ = true;
-        break;
-
-    default:
-        return;
-    }
+    dirty_ = true;
 }
 
-void MidiManager::CommitIfDirty() {
-    if (dirty_) {
+void MidiManager::CommitIfDirty()
+{
+    if(dirty_)
+    {
         params_.Commit();
         dirty_ = false;
     }

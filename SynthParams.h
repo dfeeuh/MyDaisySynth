@@ -1,32 +1,36 @@
-#include "core_cm7.h"  // or cm4 depending on Seed
+#include "core_cm7.h" // or cm4 depending on Seed
+#include "daisysp.h"
+
+
+#include <array>
+
+enum ParamID
+{
+    MasterAmplitude = 0,
+    Attack,
+    Decay,
+    Sustain,
+    Release,
+    Count
+};
 
 struct SynthParams
 {
-    float amplitude;  // Overall amplitude
-    float cutoff;
-    float resonance;
-    float attack;
-    float decay;
-    float sustain;
-    float release;
-    // add as many as you like
-
-    SynthParams() :
-      amplitude{1.0f},
-      attack{5e-3f},
-      decay{0.f},
-      sustain{1.0f},
-      release{5e-3f}
-    {}
+    float values[ParamID::Count];
 };
+
+struct ParamDescriptor
+{
+    float            min;
+    float            max;
+    daisysp::Mapping mapping;
+};
+
 
 class ParameterState
 {
-public:
-    SynthParams& GetWriteParams()
-    {
-        return params_[write_index_];
-    }
+  public:
+    SynthParams& GetWriteParams() { return params_[write_index_]; }
 
     void Commit()
     {
@@ -37,10 +41,10 @@ public:
     SynthParams GetReadParams() const
     {
         uint8_t read = write_index_ ^ 1;
-        return params_[read];  // snapshot
+        return params_[read]; // snapshot
     }
 
-private:
-    SynthParams params_[2];
+  private:
+    SynthParams      params_[2];
     volatile uint8_t write_index_ = 0;
 };
