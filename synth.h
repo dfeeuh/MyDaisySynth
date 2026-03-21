@@ -50,8 +50,8 @@ class Synth
     void NoteOff();
 
   private:
-    daisysp::Oscillator osc;
-    daisysp::Adsr       env;
+    daisysp::Oscillator osc_;
+    daisysp::Adsr       env_;
 
     // Shared references
     EvQueue&        evq;
@@ -59,8 +59,12 @@ class Synth
 
     static Synth* instance_;
 
-    SmoothedParam masterAmplitude_;
-    float         noteVelocity_;
+    SmoothedParam       masterAmplitude_;
+    daisysp::MoogLadder filter_;
+    SmoothedParam       filterCutoff_;
+    SmoothedParam       filterReson_;
+
+    float noteVelocity_;
 
     float sampleRate_;
     bool  env_gate_ = false;

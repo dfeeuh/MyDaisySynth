@@ -11,11 +11,19 @@ enum ParamID
     Decay,
     Sustain,
     Release,
+    FilterCutoff,
+    FilterReson,
     Count
 };
 
 struct SynthParams
 {
+    SynthParams() {
+        values[MasterAmplitude] = 0.5f;
+        values[FilterCutoff] = 10000.0f;
+        values[FilterReson] = 0.0f;
+    }
+
     float values[ParamID::Count];
 };
 

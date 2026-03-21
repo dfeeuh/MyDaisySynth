@@ -1,6 +1,9 @@
 # Project Name
 TARGET = SynthExpt
 
+USE_DAISYSP_LGPL = 1
+
+
 # Sources
 CPP_SOURCES = SynthExpt.cpp synth.cpp MidiManager.cpp
 
