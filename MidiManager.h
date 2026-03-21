@@ -8,7 +8,7 @@ class EvQueue;
 
 class MidiManager
 {
-public:
+  public:
     MidiManager(ParameterState& params, EvQueue& q);
 
     ~MidiManager() = default;
@@ -17,7 +17,7 @@ public:
 
     void CommitIfDirty();
 
-private:
+  private:
     void onNoteOn(uint8_t note, uint8_t vel);
     void onNoteOff(uint8_t note);
 
@@ -26,7 +26,7 @@ private:
     void initCcMap();
 
     ParameterState& params_;
-    EvQueue& evq;
+    EvQueue&        evq;
 
     bool dirty_ = false;
 };
