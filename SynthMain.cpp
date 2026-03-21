@@ -9,7 +9,7 @@
 #include "daisy_seed.h"
 #include "daisysp.h"
 
-#include "synth.h"
+#include "Synth.h"
 #include "MidiManager.h"
 #include "EventQueue.h"
 #include "SynthParams.h"

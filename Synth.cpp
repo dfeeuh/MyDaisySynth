@@ -1,4 +1,4 @@
-#include "synth.h"
+#include "Synth.h"
 #include "SynthParams.h"
 #include "EventQueue.h"
 #include "VoiceState.h"

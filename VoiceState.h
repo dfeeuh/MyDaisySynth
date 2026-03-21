@@ -1,6 +1,7 @@
 #ifndef VOICE_STATE_H
 #define VOICE_STATE_H
 
+
 struct VoiceState
 {
     static constexpr int kMaxHeldNotes = 8;
