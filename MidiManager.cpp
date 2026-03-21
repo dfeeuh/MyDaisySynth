@@ -8,8 +8,7 @@ static int8_t kCcToParam[128] = {-1};
 
 
 MidiManager::MidiManager(ParameterState& params, EvQueue& q)
-    : params_{params}
-    , evq{q}
+: params_{params}, evq{q}
 {
     initCcMap();
 }
@@ -42,24 +41,23 @@ void MidiManager::HandleMidiMessage(daisy::MidiEvent m)
 
 void MidiManager::onNoteOn(uint8_t note, uint8_t vel)
 {
-    float f   = daisysp::mtof(note);
-    float amp = daisysp::fmap(vel/127.f, 0.f, 1.f, daisysp::Mapping::EXP);
-    evq.push({EV_NOTE_ON, f, amp});
+    float amp = daisysp::fmap(vel / 127.f, 0.f, 1.f, daisysp::Mapping::EXP);
+    evq.push({EV_NOTE_ON, note, amp});
 }
 
 void MidiManager::onNoteOff(uint8_t note)
 {
-    evq.push({EV_NOTE_OFF});
+    evq.push({EV_NOTE_OFF, note, 0});
 }
 
 constexpr ParamDescriptor kParamDescriptors[] = {
     {0.0f, 1.0f, daisysp::Mapping::LINEAR},    // MasterAmplitude
-    {0.005f, 10.0f, daisysp::Mapping::LOG}, // Attack
-    {0.005f, 10.0f, daisysp::Mapping::LOG}, // Decay
+    {0.005f, 10.0f, daisysp::Mapping::LOG},    // Attack
+    {0.005f, 10.0f, daisysp::Mapping::LOG},    // Decay
     {0.0f, 1.0f, daisysp::Mapping::LINEAR},    // Sustain
-    {0.005f, 15.0f, daisysp::Mapping::LOG}, // Release
+    {0.005f, 15.0f, daisysp::Mapping::LOG},    // Release
     {100.0f, 10000.0f, daisysp::Mapping::LOG}, // Filter Cutoff
-    {0.0f, 0.8f, daisysp::Mapping::LINEAR}  // Filter Resonance
+    {0.0f, 0.8f, daisysp::Mapping::LINEAR}     // Filter Resonance
 };
 
 void MidiManager::initCcMap()

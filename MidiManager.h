@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MIDI_MANAGER_H
+#define MIDI_MANAGER_H
 
 #include "daisy_seed.h"
 
@@ -30,3 +31,5 @@ class MidiManager
 
     bool dirty_ = false;
 };
+
+#endif /* MIDI_MANAGER_H */

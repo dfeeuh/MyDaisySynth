@@ -1,3 +1,6 @@
+#ifndef MIDI_TABLES_H
+#define MIDI_TABLES_H
+
 constexpr float kMidiNoteToFreq[128] = {
     8.175799f,    8.661957f,    9.177024f,    9.722718f,
     10.300861f,    10.913382f,    11.562326f,    12.249857f,
@@ -32,3 +35,5 @@ constexpr float kMidiNoteToFreq[128] = {
     8372.018090f,    8869.844191f,    9397.272573f,    9956.063479f,
     10548.081821f,    11175.303406f,    11839.821527f,    12543.853951f,
 };
+
+#endif /* MIDI_TABLES_H */

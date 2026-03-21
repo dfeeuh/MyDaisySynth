@@ -1,12 +1,13 @@
 #include "synth.h"
 #include "SynthParams.h"
 #include "EventQueue.h"
+#include "VoiceState.h"
 
 Synth* Synth::instance_ = nullptr;
 
 
 Synth::Synth(ParameterState& params, EvQueue& q, float sampleRate)
-: evq{q}, params_{params}, sampleRate_{sampleRate}
+: evq{q}, params_{params}, sampleRate_{sampleRate}, glide_{0.1f}
 {
     osc_.Init(sampleRate);
     osc_.SetWaveform(daisysp::Oscillator::WAVE_SQUARE);
@@ -24,13 +25,17 @@ void Synth::Process(float* sampleL, float* sampleR, size_t size)
     {
         if(e.type == EV_NOTE_ON)
         {
-            NoteOn(e.freq, e.vel);
+            NoteOn(e.note, e.vel);
         }
         else if(e.type == EV_NOTE_OFF)
         {
-            NoteOff();
+            NoteOff(e.note);
         }
     }
+
+    voice_.currentFrequency_
+        += glide_ * (voice_.targetFrequency_ - voice_.currentFrequency_);
+    osc_.SetFreq(voice_.currentFrequency_);
 
     updateFromParams();
 
@@ -42,7 +47,7 @@ void Synth::Process(float* sampleL, float* sampleR, size_t size)
         float env_out = env_.Process(env_gate_);
         float osc_out = osc_.Process();
 
-        float voice_amp = env_out * noteVelocity_;
+        float voice_amp = env_out * velocity_;
         float adsr_out  = osc_out * voice_amp;
 
         float filt_out = filter_.Process(adsr_out);
@@ -53,22 +58,42 @@ void Synth::Process(float* sampleL, float* sampleR, size_t size)
     }
 }
 
-void Synth::NoteOn(float f, float amp)
+void Synth::NoteOn(uint8_t note, float amp)
 {
-    osc_.SetFreq(f);
-    noteVelocity_ = amp;
-    env_gate_     = true;
+    bool wasEmpty = voice_.isEmpty();
 
-    // Retrigger results in discontinuities.
-    env_.Retrigger(false);
+    if(!voice_.NoteOn(note))
+    {
+        return; // Note already playing, do nothing
+    }
+
+    osc_.SetFreq(voice_.targetFrequency_);
+
+    if(wasEmpty)
+    {
+        velocity_ = amp;
+        env_gate_ = true;
+        // Retrigger results in discontinuities.
+        env_.Retrigger(false);
+    }
+    else
+    {
+        // legator - no retrigger
+    }
 }
 
-void Synth::NoteOff()
+void Synth::NoteOff(uint8_t note)
 {
-    env_gate_ = false;
+    voice_.NoteOff(note);
+    if(voice_.isEmpty())
+    {
+        // No notes left
+        env_gate_ = false;
+    }
 }
 
-void Synth::updateFromParams() {
+void Synth::updateFromParams()
+{
     SynthParams p = params_.GetReadParams();
 
     masterAmplitude_.Set(p.values[ParamID::MasterAmplitude]);

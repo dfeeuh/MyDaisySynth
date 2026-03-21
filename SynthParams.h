@@ -1,3 +1,6 @@
+#ifndef SYNTH_PARAMS_H
+#define SYNTH_PARAMS_H
+
 #include "core_cm7.h" // or cm4 depending on Seed
 #include "daisysp.h"
 
@@ -18,15 +21,16 @@ enum ParamID
 
 struct SynthParams
 {
-    SynthParams() {
+    SynthParams()
+    {
         // Temporary initialisation.
         values[MasterAmplitude] = 0.5f;
-        values[Attack] = 0.005f;
-        values[Decay] = 0.005f;
-        values[Sustain] = 1.0f;
-        values[Release] = 0.005f;
-        values[FilterCutoff] = 10000.0f;
-        values[FilterReson] = 0.0f;
+        values[Attack]          = 0.005f;
+        values[Decay]           = 0.005f;
+        values[Sustain]         = 1.0f;
+        values[Release]         = 0.005f;
+        values[FilterCutoff]    = 10000.0f;
+        values[FilterReson]     = 0.0f;
     }
 
     float values[ParamID::Count];
@@ -61,3 +65,5 @@ class ParameterState
     SynthParams      params_[2];
     volatile uint8_t write_index_ = 0;
 };
+
+#endif /* SYNTH_PARAMS_H */

@@ -1,6 +1,10 @@
+#ifndef SNYTH_H
+#define SYNTH_H
 
 #include "daisy_seed.h"
 #include "daisysp.h"
+
+#include "VoiceState.h"
 
 class ParameterState;
 class EvQueue;
@@ -46,11 +50,10 @@ class Synth
 
     void Process(float* sampleL, float* sampleR, size_t size);
 
-    void NoteOn(float freq, float amp);
-    void NoteOff();
+    void NoteOn(uint8_t note, float amp);
+    void NoteOff(uint8_t note);
 
   private:
-
     void updateFromParams(); // Control rate paramater update
 
     daisysp::Oscillator osc_;
@@ -67,8 +70,12 @@ class Synth
     SmoothedParam       filterCutoff_;
     SmoothedParam       filterReson_;
 
-    float noteVelocity_;
+    VoiceState voice_;
+    float      velocity_;
 
     float sampleRate_;
+    float glide_;
     bool  env_gate_ = false;
 };
+
+#endif /* SYNTH_H */
