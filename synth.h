@@ -50,6 +50,9 @@ class Synth
     void NoteOff();
 
   private:
+
+    void updateFromParams(); // Control rate paramater update
+
     daisysp::Oscillator osc_;
     daisysp::Adsr       env_;
 

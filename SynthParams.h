@@ -19,7 +19,12 @@ enum ParamID
 struct SynthParams
 {
     SynthParams() {
+        // Temporary initialisation.
         values[MasterAmplitude] = 0.5f;
+        values[Attack] = 0.005f;
+        values[Decay] = 0.005f;
+        values[Sustain] = 1.0f;
+        values[Release] = 0.005f;
         values[FilterCutoff] = 10000.0f;
         values[FilterReson] = 0.0f;
     }

@@ -12,10 +12,9 @@ Synth::Synth(ParameterState& params, EvQueue& q, float sampleRate)
     osc_.SetWaveform(daisysp::Oscillator::WAVE_SQUARE);
     osc_.SetAmp(1.0f); // Set separately to master gain
     env_.Init(sampleRate);
-
     filter_.Init(sampleRate);
-    filter_.SetFreq(sampleRate / 2.f);
-    filter_.SetRes(0);
+
+    updateFromParams();
 }
 
 void Synth::Process(float* sampleL, float* sampleR, size_t size)
@@ -33,19 +32,7 @@ void Synth::Process(float* sampleL, float* sampleR, size_t size)
         }
     }
 
-    SynthParams p = params_.GetReadParams();
-
-    masterAmplitude_.Set(p.values[ParamID::MasterAmplitude]);
-
-    // ADSR Envelope
-    env_.SetAttackTime(p.values[ParamID::Attack]);
-    env_.SetDecayTime(p.values[ParamID::Decay]);
-    env_.SetSustainLevel(p.values[ParamID::Sustain]);
-    env_.SetReleaseTime(p.values[ParamID::Release]);
-
-    // Update to the smoothed filter parameters
-    filterCutoff_.Set(p.values[ParamID::FilterCutoff]);
-    filterReson_.Set(p.values[ParamID::FilterReson]);
+    updateFromParams();
 
     for(size_t i = 0; i < size; i++)
     {
@@ -79,4 +66,20 @@ void Synth::NoteOn(float f, float amp)
 void Synth::NoteOff()
 {
     env_gate_ = false;
+}
+
+void Synth::updateFromParams() {
+    SynthParams p = params_.GetReadParams();
+
+    masterAmplitude_.Set(p.values[ParamID::MasterAmplitude]);
+
+    // ADSR Envelope
+    env_.SetAttackTime(p.values[ParamID::Attack]);
+    env_.SetDecayTime(p.values[ParamID::Decay]);
+    env_.SetSustainLevel(p.values[ParamID::Sustain]);
+    env_.SetReleaseTime(p.values[ParamID::Release]);
+
+    // Update to the smoothed filter parameters
+    filterCutoff_.Set(p.values[ParamID::FilterCutoff]);
+    filterReson_.Set(p.values[ParamID::FilterReson]);
 }
