@@ -1,0 +1,30 @@
+#include "SynthParams.h"
+
+SynthParams::SynthParams()
+{
+    // Default initialisation.
+    values[MasterAmplitude] = 0.5f;
+    values[Attack]          = 0.005f;
+    values[Decay]           = 0.005f;
+    values[Sustain]         = 1.0f;
+    values[Release]         = 0.005f;
+    values[FilterCutoff]    = 10000.f;
+    values[FilterReson]     = 0.0f;
+}
+
+SynthParams& ParameterState::GetWriteParams()
+{
+    return params_[write_index_];
+}
+
+void ParameterState::Commit()
+{
+    __DMB();
+    write_index_ ^= 1;
+}
+
+SynthParams ParameterState::GetReadParams() const
+{
+    uint8_t read = write_index_ ^ 1;
+    return params_[read]; // snapshot
+}

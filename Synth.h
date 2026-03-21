@@ -5,28 +5,11 @@
 #include "daisysp.h"
 
 #include "VoiceState.h"
+#include "SmoothedParam.h"
 
 class ParameterState;
 class EvQueue;
 
-class SmoothedParam
-{
-  public:
-    SmoothedParam(float smoothRate = 0.001f) : smoothRate_{smoothRate} {}
-
-    void Set(float x) { target_ = x; }
-
-    float Process()
-    {
-        current_ += smoothRate_ * (target_ - current_);
-        return current_;
-    }
-
-  private:
-    float target_;
-    float current_;
-    float smoothRate_;
-};
 
 class Synth
 {
@@ -56,7 +39,8 @@ class Synth
   private:
     void updateFromParams(); // Control rate paramater update
 
-    daisysp::Oscillator osc_;
+    daisysp::Oscillator osc1_;
+    daisysp::Oscillator osc2_;
     daisysp::Adsr       env_;
 
     // Shared references
@@ -69,6 +53,7 @@ class Synth
     daisysp::MoogLadder filter_;
     SmoothedParam       filterCutoff_;
     SmoothedParam       filterReson_;
+    SmoothedParam       osc2_freq_multiplier_; /* multiplies osc2 freq  */
 
     VoiceState voice_;
     float      velocity_;

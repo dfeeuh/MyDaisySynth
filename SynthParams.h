@@ -21,17 +21,7 @@ enum ParamID
 
 struct SynthParams
 {
-    SynthParams()
-    {
-        // Temporary initialisation.
-        values[MasterAmplitude] = 0.5f;
-        values[Attack]          = 0.005f;
-        values[Decay]           = 0.005f;
-        values[Sustain]         = 1.0f;
-        values[Release]         = 0.005f;
-        values[FilterCutoff]    = 10000.0f;
-        values[FilterReson]     = 0.0f;
-    }
+    SynthParams();
 
     float values[ParamID::Count];
 };
@@ -47,19 +37,9 @@ struct ParamDescriptor
 class ParameterState
 {
   public:
-    SynthParams& GetWriteParams() { return params_[write_index_]; }
-
-    void Commit()
-    {
-        __DMB();
-        write_index_ ^= 1;
-    }
-
-    SynthParams GetReadParams() const
-    {
-        uint8_t read = write_index_ ^ 1;
-        return params_[read]; // snapshot
-    }
+    SynthParams& GetWriteParams();
+    void Commit();
+    SynthParams GetReadParams() const;
 
   private:
     SynthParams      params_[2];

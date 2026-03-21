@@ -16,7 +16,7 @@ bool VoiceState::NoteOn(uint8_t note)
 
     uint8_t currentNote = notes_[count_ - 1];
 
-    targetFrequency_ = kMidiNoteToFreq[currentNote];
+    frequency_.Set(kMidiNoteToFreq[currentNote]);
 
     return true;
 }
@@ -40,6 +40,6 @@ void VoiceState::NoteOff(uint8_t note)
     if(count_ > 0)
     {
         uint8_t currentNote = notes_[count_ - 1];
-        targetFrequency_    = kMidiNoteToFreq[currentNote];
+        frequency_.Set(kMidiNoteToFreq[currentNote]);
     }
 }

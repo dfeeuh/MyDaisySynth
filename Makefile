@@ -5,7 +5,12 @@ USE_DAISYSP_LGPL = 1
 
 
 # Sources
-CPP_SOURCES = SynthMain.cpp Synth.cpp MidiManager.cpp VoiceState.cpp
+CPP_SOURCES = \
+  SynthMain.cpp \
+  Synth.cpp \
+  MidiManager.cpp \
+  VoiceState.cpp \
+  SynthParams.cpp
 
 # Library Locations
 LIBDAISY_DIR = ../../libDaisy/

@@ -9,9 +9,16 @@ Synth* Synth::instance_ = nullptr;
 Synth::Synth(ParameterState& params, EvQueue& q, float sampleRate)
 : evq{q}, params_{params}, sampleRate_{sampleRate}, glide_{0.1f}
 {
-    osc_.Init(sampleRate);
-    osc_.SetWaveform(daisysp::Oscillator::WAVE_SQUARE);
-    osc_.SetAmp(1.0f); // Set separately to master gain
+    osc1_.Init(sampleRate);
+    osc1_.SetWaveform(daisysp::Oscillator::WAVE_SQUARE);
+    osc1_.SetAmp(1.0f); // Set separately to master gain
+
+    osc2_.Init(sampleRate);
+    osc2_.SetWaveform(daisysp::Oscillator::WAVE_SAW);
+    osc2_.SetAmp(1.0f);
+
+    osc2_freq_multiplier_.Set(1.01f);
+
     env_.Init(sampleRate);
     filter_.Init(sampleRate);
 
@@ -33,9 +40,10 @@ void Synth::Process(float* sampleL, float* sampleR, size_t size)
         }
     }
 
-    voice_.currentFrequency_
-        += glide_ * (voice_.targetFrequency_ - voice_.currentFrequency_);
-    osc_.SetFreq(voice_.currentFrequency_);
+    float currentFreq = voice_.frequency_.Process();
+
+    osc1_.SetFreq(currentFreq);
+    osc2_.SetFreq(currentFreq * osc2_freq_multiplier_.Process());
 
     updateFromParams();
 
@@ -45,10 +53,12 @@ void Synth::Process(float* sampleL, float* sampleR, size_t size)
         filter_.SetRes(filterReson_.Process());
 
         float env_out = env_.Process(env_gate_);
-        float osc_out = osc_.Process();
+        float osc1_out = osc1_.Process();
+        float osc2_out = osc2_.Process();
+
 
         float voice_amp = env_out * velocity_;
-        float adsr_out  = osc_out * voice_amp;
+        float adsr_out  = 0.5 * (osc1_out + osc2_out) * voice_amp;
 
         float filt_out = filter_.Process(adsr_out);
         float final    = filt_out * masterAmplitude_.Process();
@@ -66,8 +76,6 @@ void Synth::NoteOn(uint8_t note, float amp)
     {
         return; // Note already playing, do nothing
     }
-
-    osc_.SetFreq(voice_.targetFrequency_);
 
     if(wasEmpty)
     {
