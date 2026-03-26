@@ -9,7 +9,8 @@
 
 enum ParamID
 {
-    MasterAmplitude = 0,
+    Osc1Amp,
+    Osc2Amp,
     Attack,
     Decay,
     Sustain,
@@ -18,6 +19,7 @@ enum ParamID
     FilterReson,
     LfoFreq,
     LfoDepth,
+    MasterAmplitude,
     Count
 };
 

@@ -44,10 +44,7 @@ class Synth
     daisysp::Adsr       env_;
 
     daisysp::Oscillator lfo_;
-    float               lfo_amp_level_;
-    float               lfo_pitch_level_;
-    float               lfo_filter_level_;
-    float               base_amp_;  /* total oscillator amp plus LFO depth */
+    float               lfo_depth_;  /* total oscillator amp plus LFO depth */
 
     // Shared references
     EvQueue&        evq;
@@ -55,12 +52,12 @@ class Synth
 
     static Synth* instance_;
 
-    SmoothedParam       masterAmplitude_;
     daisysp::MoogLadder filter_;
     SmoothedParam       filterCutoff_;
     SmoothedParam       filterReson_;
     SmoothedParam       osc2_freq_multiplier_; /* DETUNE! multiplies osc2 freq  */
 
+    SmoothedParam       masterAmplitude_;
     VoiceState voice_;
     float      velocity_;
 

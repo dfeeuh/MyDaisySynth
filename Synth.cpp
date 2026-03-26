@@ -7,7 +7,7 @@ Synth* Synth::instance_ = nullptr;
 
 
 Synth::Synth(ParameterState& params, EvQueue& q, float sampleRate)
-: base_amp_{1.0}, evq{q}, params_{params}, sampleRate_{sampleRate}, glide_{0.1f}
+: evq{q}, params_{params}, sampleRate_{sampleRate}, glide_{0.1f}
 {
     osc1_.Init(sampleRate);
     osc1_.SetWaveform(daisysp::Oscillator::WAVE_SQUARE);
@@ -59,7 +59,10 @@ void Synth::Process(float* sampleL, float* sampleR, size_t size)
         float osc1_out = osc1_.Process();
         float osc2_out = osc2_.Process();
 
-        float mod_amp = (base_amp_ + lfo_.Process()) * env_out;
+        float gain = (1.f - lfo_depth_ * 0.5f)  // base drops as depth rises
+                     + lfo_.Process();           // limits swing to ±0.5 max
+
+        float mod_amp = gain * env_out;
 
         float voice_amp = mod_amp * velocity_;
         float adsr_out  = 0.5 * (osc1_out + osc2_out) * voice_amp;
@@ -108,8 +111,6 @@ void Synth::updateFromParams()
 {
     SynthParams p = params_.GetReadParams();
 
-    masterAmplitude_.Set(p.values[ParamID::MasterAmplitude]);
-
     // ADSR Envelope
     env_.SetAttackTime(p.values[ParamID::Attack]);
     env_.SetDecayTime(p.values[ParamID::Decay]);
@@ -121,5 +122,8 @@ void Synth::updateFromParams()
     filterReson_.Set(p.values[ParamID::FilterReson]);
 
     lfo_.SetFreq(p.values[ParamID::LfoFreq]);
-    lfo_.SetAmp(p.values[ParamID::LfoDepth]);
+    lfo_depth_ = p.values[ParamID::LfoDepth];
+    lfo_.SetAmp(lfo_depth_ * 0.5); // limits swing to ±0.5 max
+
+    masterAmplitude_.Set(p.values[ParamID::MasterAmplitude]);
 }

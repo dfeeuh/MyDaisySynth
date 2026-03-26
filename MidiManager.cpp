@@ -51,7 +51,8 @@ void MidiManager::onNoteOff(uint8_t note)
 }
 
 constexpr ParamDescriptor kParamDescriptors[] = {
-    {0.0f, 1.0f, daisysp::Mapping::LINEAR},    // MasterAmplitude
+    {0.0f, 1.0f, daisysp::Mapping::LINEAR},    // Osc1Amp
+    {0.0f, 1.0f, daisysp::Mapping::LINEAR},    // Osc2Amp
     {0.005f, 10.0f, daisysp::Mapping::LOG},    // Attack
     {0.005f, 10.0f, daisysp::Mapping::LOG},    // Decay
     {0.0f, 1.0f, daisysp::Mapping::LINEAR},    // Sustain
@@ -59,21 +60,24 @@ constexpr ParamDescriptor kParamDescriptors[] = {
     {100.0f, 10000.0f, daisysp::Mapping::LOG}, // Filter Cutoff
     {0.0f, 0.8f, daisysp::Mapping::LINEAR},    // Filter Resonance
     {0.0f, 20.0f, daisysp::Mapping::LINEAR},   // LFO Frequency
-    {0.f, 1.0f, daisysp::Mapping::LINEAR}      // LFO Depth
+    {0.f, 1.0f, daisysp::Mapping::LINEAR},     // LFO Depth
+    {0.0f, 1.0f, daisysp::Mapping::LINEAR}     // MasterAmplitude
 };
 
 void MidiManager::initCcMap()
 {
     /* 0–10 unused = -1 */
-    kCcToParam[11] = (int8_t)ParamID::MasterAmplitude;
-    kCcToParam[12] = (int8_t)ParamID::Attack;
-    kCcToParam[13] = (int8_t)ParamID::Decay;
-    kCcToParam[14] = (int8_t)ParamID::Sustain;
-    kCcToParam[15] = (int8_t)ParamID::Release;
-    kCcToParam[16] = (int8_t)ParamID::FilterCutoff;
-    kCcToParam[17] = (int8_t)ParamID::FilterReson;
-    kCcToParam[18] = (int8_t)ParamID::LfoFreq;
-    kCcToParam[19] = (int8_t)ParamID::LfoDepth;
+    kCcToParam[11] = (int8_t)ParamID::Osc1Amp;
+    kCcToParam[12] = (int8_t)ParamID::Osc2Amp;
+    kCcToParam[13] = (int8_t)ParamID::Attack;
+    kCcToParam[14] = (int8_t)ParamID::Decay;
+    kCcToParam[15] = (int8_t)ParamID::Sustain;
+    kCcToParam[16] = (int8_t)ParamID::Release;
+    kCcToParam[17] = (int8_t)ParamID::FilterCutoff;
+    kCcToParam[18] = (int8_t)ParamID::FilterReson;
+    kCcToParam[19] = (int8_t)ParamID::LfoFreq;
+    kCcToParam[20] = (int8_t)ParamID::LfoDepth;
+    kCcToParam[21] = (int8_t)ParamID::MasterAmplitude;
 };
 
 void MidiManager::onHandleCc(uint8_t cc, uint8_t value)

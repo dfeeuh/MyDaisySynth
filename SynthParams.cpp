@@ -3,7 +3,6 @@
 SynthParams::SynthParams()
 {
     // Default initialisation.
-    values[MasterAmplitude] = 0.5f;
     values[Attack]          = 0.005f;
     values[Decay]           = 0.005f;
     values[Sustain]         = 1.0f;
@@ -12,6 +11,7 @@ SynthParams::SynthParams()
     values[FilterReson]     = 0.0f;
     values[LfoFreq]         = 0.0f;
     values[LfoDepth]        = 0.0f;
+    values[MasterAmplitude] = 0.5f;
 }
 
 SynthParams& ParameterState::GetWriteParams()
