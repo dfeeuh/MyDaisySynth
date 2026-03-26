@@ -10,6 +10,8 @@ SynthParams::SynthParams()
     values[Release]         = 0.005f;
     values[FilterCutoff]    = 10000.f;
     values[FilterReson]     = 0.0f;
+    values[LfoFreq]         = 0.0f;
+    values[LfoDepth]        = 0.0f;
 }
 
 SynthParams& ParameterState::GetWriteParams()

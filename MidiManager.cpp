@@ -57,7 +57,9 @@ constexpr ParamDescriptor kParamDescriptors[] = {
     {0.0f, 1.0f, daisysp::Mapping::LINEAR},    // Sustain
     {0.005f, 15.0f, daisysp::Mapping::LOG},    // Release
     {100.0f, 10000.0f, daisysp::Mapping::LOG}, // Filter Cutoff
-    {0.0f, 0.8f, daisysp::Mapping::LINEAR}     // Filter Resonance
+    {0.0f, 0.8f, daisysp::Mapping::LINEAR},    // Filter Resonance
+    {0.0f, 20.0f, daisysp::Mapping::LINEAR},   // LFO Frequency
+    {0.f, 1.0f, daisysp::Mapping::LINEAR}      // LFO Depth
 };
 
 void MidiManager::initCcMap()
@@ -70,6 +72,8 @@ void MidiManager::initCcMap()
     kCcToParam[15] = (int8_t)ParamID::Release;
     kCcToParam[16] = (int8_t)ParamID::FilterCutoff;
     kCcToParam[17] = (int8_t)ParamID::FilterReson;
+    kCcToParam[18] = (int8_t)ParamID::LfoFreq;
+    kCcToParam[19] = (int8_t)ParamID::LfoDepth;
 };
 
 void MidiManager::onHandleCc(uint8_t cc, uint8_t value)

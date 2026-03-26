@@ -16,6 +16,8 @@ enum ParamID
     Release,
     FilterCutoff,
     FilterReson,
+    LfoFreq,
+    LfoDepth,
     Count
 };
 

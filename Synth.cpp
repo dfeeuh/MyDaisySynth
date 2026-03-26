@@ -7,7 +7,7 @@ Synth* Synth::instance_ = nullptr;
 
 
 Synth::Synth(ParameterState& params, EvQueue& q, float sampleRate)
-: evq{q}, params_{params}, sampleRate_{sampleRate}, glide_{0.1f}
+: base_amp_{1.0}, evq{q}, params_{params}, sampleRate_{sampleRate}, glide_{0.1f}
 {
     osc1_.Init(sampleRate);
     osc1_.SetWaveform(daisysp::Oscillator::WAVE_SQUARE);
@@ -21,6 +21,9 @@ Synth::Synth(ParameterState& params, EvQueue& q, float sampleRate)
 
     env_.Init(sampleRate);
     filter_.Init(sampleRate);
+
+    lfo_.Init(sampleRate);
+    lfo_.SetWaveform(daisysp::Oscillator::WAVE_SIN);
 
     updateFromParams();
 }
@@ -56,8 +59,9 @@ void Synth::Process(float* sampleL, float* sampleR, size_t size)
         float osc1_out = osc1_.Process();
         float osc2_out = osc2_.Process();
 
+        float mod_amp = (base_amp_ + lfo_.Process()) * env_out;
 
-        float voice_amp = env_out * velocity_;
+        float voice_amp = mod_amp * velocity_;
         float adsr_out  = 0.5 * (osc1_out + osc2_out) * voice_amp;
 
         float filt_out = filter_.Process(adsr_out);
@@ -115,4 +119,7 @@ void Synth::updateFromParams()
     // Update to the smoothed filter parameters
     filterCutoff_.Set(p.values[ParamID::FilterCutoff]);
     filterReson_.Set(p.values[ParamID::FilterReson]);
+
+    lfo_.SetFreq(p.values[ParamID::LfoFreq]);
+    lfo_.SetAmp(p.values[ParamID::LfoDepth]);
 }
