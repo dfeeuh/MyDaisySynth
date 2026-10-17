@@ -17,9 +17,9 @@ Synth::Synth(ParameterState& params, EvQueue& q, float sampleRate)
     osc2_.SetWaveform(daisysp::Oscillator::WAVE_SAW);
     osc2_.SetAmp(1.0f);
 
-    osc2_freq_multiplier_.Set(1.01f);
+    osc_detune_factor_.Set(0.0f);
 
-    env_.Init(sampleRate);
+    amp_env_.Init(sampleRate);
     filter_.Init(sampleRate);
 
     lfo_.Init(sampleRate);
@@ -45,8 +45,9 @@ void Synth::Process(float* sampleL, float* sampleR, size_t size)
 
     float currentFreq = voice_.frequency_.Process();
 
-    osc1_.SetFreq(currentFreq);
-    osc2_.SetFreq(currentFreq * osc2_freq_multiplier_.Process());
+    float oscOffset = osc_detune_factor_.Process() * 0.5f;
+    osc1_.SetFreq(currentFreq * (1.0f - oscOffset));
+    osc2_.SetFreq(currentFreq * (1.0f + oscOffset));
 
     updateFromParams();
 
@@ -55,7 +56,7 @@ void Synth::Process(float* sampleL, float* sampleR, size_t size)
         filter_.SetFreq(filterCutoff_.Process());
         filter_.SetRes(filterReson_.Process());
 
-        float env_out = env_.Process(env_gate_);
+        float env_out = amp_env_.Process(env_gate_);
         float osc1_out = osc1_.Process();
         float osc2_out = osc2_.Process();
 
@@ -89,7 +90,7 @@ void Synth::NoteOn(uint8_t note, float amp)
         velocity_ = amp;
         env_gate_ = true;
         // Retrigger results in discontinuities.
-        env_.Retrigger(false);
+        amp_env_.Retrigger(false);
     }
     else
     {
@@ -112,10 +113,10 @@ void Synth::updateFromParams()
     SynthParams p = params_.GetReadParams();
 
     // ADSR Envelope
-    env_.SetAttackTime(p.values[ParamID::Attack]);
-    env_.SetDecayTime(p.values[ParamID::Decay]);
-    env_.SetSustainLevel(p.values[ParamID::Sustain]);
-    env_.SetReleaseTime(p.values[ParamID::Release]);
+    amp_env_.SetAttackTime(p.values[ParamID::AmpAttack]);
+    amp_env_.SetDecayTime(p.values[ParamID::AmpDecay]);
+    amp_env_.SetSustainLevel(p.values[ParamID::AmpSustain]);
+    amp_env_.SetReleaseTime(p.values[ParamID::AmpRelease]);
 
     // Update to the smoothed filter parameters
     filterCutoff_.Set(p.values[ParamID::FilterCutoff]);
@@ -124,6 +125,8 @@ void Synth::updateFromParams()
     lfo_.SetFreq(p.values[ParamID::LfoFreq]);
     lfo_depth_ = p.values[ParamID::LfoDepth];
     lfo_.SetAmp(lfo_depth_ * 0.5); // limits swing to ±0.5 max
+
+    osc_detune_factor_.Set(p.values[ParamID::OscDetune]);
 
     masterAmplitude_.Set(p.values[ParamID::MasterAmplitude]);
 }

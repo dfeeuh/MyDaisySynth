@@ -11,10 +11,11 @@ enum ParamID
 {
     Osc1Amp,
     Osc2Amp,
-    Attack,
-    Decay,
-    Sustain,
-    Release,
+    OscDetune,
+    AmpAttack,
+    AmpDecay,
+    AmpSustain,
+    AmpRelease,
     FilterCutoff,
     FilterReson,
     LfoFreq,
@@ -42,8 +43,8 @@ class ParameterState
 {
   public:
     SynthParams& GetWriteParams();
-    void Commit();
-    SynthParams GetReadParams() const;
+    void         Commit();
+    SynthParams  GetReadParams() const;
 
   private:
     SynthParams      params_[2];

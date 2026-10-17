@@ -53,10 +53,11 @@ void MidiManager::onNoteOff(uint8_t note)
 constexpr ParamDescriptor kParamDescriptors[] = {
     {0.0f, 1.0f, daisysp::Mapping::LINEAR},    // Osc1Amp
     {0.0f, 1.0f, daisysp::Mapping::LINEAR},    // Osc2Amp
-    {0.005f, 10.0f, daisysp::Mapping::LOG},    // Attack
-    {0.005f, 10.0f, daisysp::Mapping::LOG},    // Decay
-    {0.0f, 1.0f, daisysp::Mapping::LINEAR},    // Sustain
-    {0.005f, 15.0f, daisysp::Mapping::LOG},    // Release
+    {0.001f, 0.03f, daisysp::Mapping::LOG},   // OscDetune
+    {0.005f, 10.0f, daisysp::Mapping::LOG},    // AmpAttack
+    {0.005f, 10.0f, daisysp::Mapping::LOG},    // AmpDecay
+    {0.0f, 1.0f, daisysp::Mapping::LINEAR},    // AmpSustain
+    {0.005f, 15.0f, daisysp::Mapping::LOG},    // AmpRelease
     {100.0f, 10000.0f, daisysp::Mapping::LOG}, // Filter Cutoff
     {0.0f, 0.8f, daisysp::Mapping::LINEAR},    // Filter Resonance
     {0.0f, 20.0f, daisysp::Mapping::LINEAR},   // LFO Frequency
@@ -69,15 +70,16 @@ void MidiManager::initCcMap()
     /* 0–10 unused = -1 */
     kCcToParam[11] = (int8_t)ParamID::Osc1Amp;
     kCcToParam[12] = (int8_t)ParamID::Osc2Amp;
-    kCcToParam[13] = (int8_t)ParamID::Attack;
-    kCcToParam[14] = (int8_t)ParamID::Decay;
-    kCcToParam[15] = (int8_t)ParamID::Sustain;
-    kCcToParam[16] = (int8_t)ParamID::Release;
+    kCcToParam[13] = (int8_t)ParamID::AmpAttack;
+    kCcToParam[14] = (int8_t)ParamID::AmpDecay;
+    kCcToParam[15] = (int8_t)ParamID::AmpSustain;
+    kCcToParam[16] = (int8_t)ParamID::AmpRelease;
     kCcToParam[17] = (int8_t)ParamID::FilterCutoff;
     kCcToParam[18] = (int8_t)ParamID::FilterReson;
     kCcToParam[19] = (int8_t)ParamID::LfoFreq;
     kCcToParam[20] = (int8_t)ParamID::LfoDepth;
-    kCcToParam[21] = (int8_t)ParamID::MasterAmplitude;
+    kCcToParam[21] = (int8_t)ParamID::OscDetune;
+    kCcToParam[22] = (int8_t)ParamID::MasterAmplitude;
 };
 
 void MidiManager::onHandleCc(uint8_t cc, uint8_t value)

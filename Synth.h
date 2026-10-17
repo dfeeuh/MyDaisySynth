@@ -41,7 +41,7 @@ class Synth
 
     daisysp::Oscillator osc1_;
     daisysp::Oscillator osc2_;
-    daisysp::Adsr       env_;
+    daisysp::Adsr       amp_env_;
 
     daisysp::Oscillator lfo_;
     float               lfo_depth_;  /* total oscillator amp plus LFO depth */
@@ -55,7 +55,7 @@ class Synth
     daisysp::MoogLadder filter_;
     SmoothedParam       filterCutoff_;
     SmoothedParam       filterReson_;
-    SmoothedParam       osc2_freq_multiplier_; /* DETUNE! multiplies osc2 freq  */
+    SmoothedParam       osc_detune_factor_; /* DETUNE! multiplies osc2 freq  */
 
     SmoothedParam       masterAmplitude_;
     VoiceState voice_;

@@ -3,14 +3,15 @@
 SynthParams::SynthParams()
 {
     // Default initialisation.
-    values[Attack]          = 0.005f;
-    values[Decay]           = 0.005f;
-    values[Sustain]         = 1.0f;
-    values[Release]         = 0.005f;
+    values[AmpAttack]       = 0.005f;
+    values[AmpDecay]        = 0.005f;
+    values[AmpSustain]      = 1.0f;
+    values[AmpRelease]      = 0.005f;
     values[FilterCutoff]    = 10000.f;
     values[FilterReson]     = 0.0f;
     values[LfoFreq]         = 0.0f;
     values[LfoDepth]        = 0.0f;
+    values[OscDetune]       = 0.0f;
     values[MasterAmplitude] = 0.5f;
 }
 
