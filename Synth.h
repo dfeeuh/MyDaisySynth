@@ -55,6 +55,8 @@ class Synth
     daisysp::MoogLadder filter_;
     SmoothedParam       filterCutoff_;
     SmoothedParam       filterReson_;
+    daisysp::Adsr       filter_env_;
+    
     SmoothedParam       osc_detune_factor_; /* DETUNE! multiplies osc2 freq  */
 
     SmoothedParam       masterAmplitude_;

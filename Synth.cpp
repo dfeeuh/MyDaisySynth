@@ -20,6 +20,7 @@ Synth::Synth(ParameterState& params, EvQueue& q, float sampleRate)
     osc_detune_factor_.Set(0.0f);
 
     amp_env_.Init(sampleRate);
+    filter_env_.Init(sampleRate);
     filter_.Init(sampleRate);
 
     lfo_.Init(sampleRate);
@@ -53,17 +54,21 @@ void Synth::Process(float* sampleL, float* sampleR, size_t size)
 
     for(size_t i = 0; i < size; i++)
     {
-        filter_.SetFreq(filterCutoff_.Process());
+        const float baseCutoff = filterCutoff_.Process();
+        const float filterEnvOut = filter_env_.Process(env_gate_);
+
+        const float cutoff = fminf(baseCutoff * exp2f(filterEnvOut * 2.0f), 10000.f);
+        filter_.SetFreq(cutoff);
         filter_.SetRes(filterReson_.Process());
 
-        float env_out = amp_env_.Process(env_gate_);
+        float amp_env_out = amp_env_.Process(env_gate_);
         float osc1_out = osc1_.Process();
         float osc2_out = osc2_.Process();
 
         float gain = (1.f - lfo_depth_ * 0.5f)  // base drops as depth rises
                      + lfo_.Process();           // limits swing to ±0.5 max
 
-        float mod_amp = gain * env_out;
+        float mod_amp = gain * amp_env_out;
 
         float voice_amp = mod_amp * velocity_;
         float adsr_out  = 0.5 * (osc1_out + osc2_out) * voice_amp;
@@ -91,6 +96,7 @@ void Synth::NoteOn(uint8_t note, float amp)
         env_gate_ = true;
         // Retrigger results in discontinuities.
         amp_env_.Retrigger(false);
+        filter_env_.Retrigger(false);
     }
     else
     {
@@ -122,10 +128,18 @@ void Synth::updateFromParams()
     filterCutoff_.Set(p.values[ParamID::FilterCutoff]);
     filterReson_.Set(p.values[ParamID::FilterReson]);
 
+    // Filter ADSR Envelope
+    filter_env_.SetAttackTime(p.values[ParamID::FilterAttack]);
+    filter_env_.SetDecayTime(p.values[ParamID::FilterDecay]);
+    filter_env_.SetSustainLevel(p.values[ParamID::FilterSustain]);
+    filter_env_.SetReleaseTime(p.values[ParamID::FilterRelease]);
+
+    // LFO
     lfo_.SetFreq(p.values[ParamID::LfoFreq]);
     lfo_depth_ = p.values[ParamID::LfoDepth];
     lfo_.SetAmp(lfo_depth_ * 0.5); // limits swing to ±0.5 max
 
+    // Oscollator detune factor
     osc_detune_factor_.Set(p.values[ParamID::OscDetune]);
 
     masterAmplitude_.Set(p.values[ParamID::MasterAmplitude]);

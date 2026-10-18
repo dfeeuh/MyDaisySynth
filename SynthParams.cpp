@@ -9,6 +9,10 @@ SynthParams::SynthParams()
     values[AmpRelease]      = 0.005f;
     values[FilterCutoff]    = 10000.f;
     values[FilterReson]     = 0.0f;
+    values[FilterAttack]    = 0.005f;
+    values[FilterDecay]     = 0.005f;
+    values[FilterSustain]   = 1.0f;
+    values[FilterRelease]   = 0.005f;
     values[LfoFreq]         = 0.0f;
     values[LfoDepth]        = 0.0f;
     values[OscDetune]       = 0.0f;
